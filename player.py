@@ -59,3 +59,5 @@ class Player(pygame.sprite.Sprite):
     def stop_move_sounds(self):
         self.move_up_sound.stop()
         self.move_down_sound.stop()
+
+# falta añadir otros objetos en mapa

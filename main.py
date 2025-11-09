@@ -12,3 +12,4 @@ pygame.display.set_mode((Screen.width, Screen.height))
 # play
 game = Game()
 game.play()
+
