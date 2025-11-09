@@ -1,7 +1,6 @@
 import pygame
 
 # Import pygame.locals for easier access to key coordinates
-# Updated to conform to flake8 and black standards
 from pygame.locals import (
     K_ESCAPE,
     KEYDOWN,
@@ -10,12 +9,19 @@ from pygame.locals import (
 
 from screen import Screen
 from player import Player
-from bird import Bird
-from cloud import Cloud
+# Ya no importamos Bird ni Cloud
+# Importamos las fábricas
+from factory_sprites import FactorySprites
 
 
 class Game:
-    def __init__(self):
+    # [cite_start]Modificamos __init__ para aceptar las fábricas [cite: 313, 318]
+    def __init__(self, factory_flying: FactorySprites, 
+                 factory_landscape: FactorySprites):
+        
+        self._factory_flying = factory_flying
+        self._factory_landscape = factory_landscape
+        
         self._initialize_game()
         self._make_objects()
         self._load_music_and_sounds()
@@ -26,27 +32,22 @@ class Game:
         self._clock = pygame.time.Clock()
         # Create and get the screen object
         self._screen = pygame.display.set_mode((Screen.width, Screen.height))
-        # Create custom events for adding a new bird and cloud
-        new_bird_period = 300
-        new_cloud_period = 500
-        # make a new bird/cloud every these milliseconds, so the smaller
-        # the more new birds/clouds
-        self._add_bird_event_type = pygame.USEREVENT + 1
-        pygame.time.set_timer(self._add_bird_event_type, new_bird_period)
-        self._add_cloud_event_type = pygame.USEREVENT + 2
-        pygame.time.set_timer(self._add_cloud_event_type, new_cloud_period)
+        
+        # Eliminamos la creación de eventos,
+        # [cite_start]ahora se gestiona en FactorySprites [cite: 357]
+        
         self._user_quits = False  # to quit press Escape or close the window
 
     def _make_objects(self):
         # Create our 'player'
         self._player = Player()
 
-        # Create groups to hold bird sprites, cloud sprites, and all sprites
-        # - birds is used for collision detection and position updates
-        # - clouds is used for position updates
-        # - all_sprites is used for rendering
-        self._birds = pygame.sprite.Group()
-        self._clouds = pygame.sprite.Group()
+        # [cite_start]Cambiamos los nombres de los grupos [cite: 357]
+        # [cite_start]_birds -> _flying_sprites [cite: 293]
+        # [cite_start]_clouds -> _landscape_sprites [cite: 300]
+        self._flying_sprites = pygame.sprite.Group()
+        self._landscape_sprites = pygame.sprite.Group()
+        
         self._all_sprites = pygame.sprite.Group()
         self._all_sprites.add(self._player)
 
@@ -73,27 +74,31 @@ class Game:
             # Did the user click the window close button? If so, stop the loop
             elif event.type == QUIT:
                 self._user_quits = True
-            # Should we add a new bird?
-            elif event.type == self._add_bird_event_type:
-                # Create the new bird, and add it to our sprite groups
-                new_bird = Bird()
-                self._birds.add(new_bird)
-                self._all_sprites.add(new_bird)
-            # Should we add a new cloud?
-            elif event.type == self._add_cloud_event_type:
-                # Create the new cloud, and add it to our sprite groups
-                new_cloud = Cloud()
-                self._clouds.add(new_cloud)
-                self._all_sprites.add(new_cloud)
+            
+            # Refactorizamos la creación de objetos usando las fábricas
+            
+            # ¿Es un evento para crear un objeto volador?
+            elif event.type in self._factory_flying.event_types:
+                new_flying = self._factory_flying.make(event.type)
+                if new_flying:
+                    self._flying_sprites.add(new_flying)
+                    self._all_sprites.add(new_flying)
+                    
+            # ¿Es un evento para crear un objeto de paisaje?
+            elif event.type in self._factory_landscape.event_types:
+                new_landscape = self._factory_landscape.make(event.type)
+                if new_landscape:
+                    self._landscape_sprites.add(new_landscape)
+                    self._all_sprites.add(new_landscape)
 
     def _update(self):
         # Get the set of keys pressed and check for user input
         pressed_keys = pygame.key.get_pressed()
         self._player.update(pressed_keys)
-        # move the player if key was an arrow
-        # Update the position of our birds and clouds
-        self._birds.update()
-        self._clouds.update()
+        
+        # [cite_start]Actualizamos los nuevos grupos [cite: 357]
+        self._flying_sprites.update()
+        self._landscape_sprites.update()
 
     def _draw(self):
         # Fill the screen.py with sky blue
@@ -105,7 +110,8 @@ class Game:
         pygame.display.flip()
 
     def _collision(self):
-        return pygame.sprite.spritecollideany(self._player, self._birds)
+        # [cite_start]Comprobamos colisión contra _flying_sprites [cite: 302, 357]
+        return pygame.sprite.spritecollideany(self._player, self._flying_sprites)
 
     def _game_over(self):
         return self._collision() or self._user_quits
