@@ -35,7 +35,7 @@ prototypes_landscape = [Cloud(), Mountain()]
 # Bird(400), Umbrella(500), Jet(1000), Missile(2500)
 periods_flying = [400, 500, 1000, 2500]
 # Cloud(500), Mountain(2000)
-periods_landscape = [500, 2000]
+periods_landscape = [500, 3000]
 
 # 4. Creamos las fábricas
 factory_flying = FactorySprites(prototypes_flying, periods_flying, 

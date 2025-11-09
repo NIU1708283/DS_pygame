@@ -15,7 +15,7 @@ from factory_sprites import FactorySprites
 
 
 class Game:
-    # [cite_start]Modificamos __init__ para aceptar las fábricas [cite: 313, 318]
+    # Modificamos __init__ para aceptar las fábricas 
     def __init__(self, factory_flying: FactorySprites, 
                  factory_landscape: FactorySprites):
         
@@ -34,7 +34,7 @@ class Game:
         self._screen = pygame.display.set_mode((Screen.width, Screen.height))
         
         # Eliminamos la creación de eventos,
-        # [cite_start]ahora se gestiona en FactorySprites [cite: 357]
+        # ahora se gestiona en FactorySprites
         
         self._user_quits = False  # to quit press Escape or close the window
 
@@ -42,9 +42,9 @@ class Game:
         # Create our 'player'
         self._player = Player()
 
-        # [cite_start]Cambiamos los nombres de los grupos [cite: 357]
-        # [cite_start]_birds -> _flying_sprites [cite: 293]
-        # [cite_start]_clouds -> _landscape_sprites [cite: 300]
+        # Cambiamos los nombres de los grupos 
+        # _birds -> _flying_sprites 
+        # _clouds -> _landscape_sprites 
         self._flying_sprites = pygame.sprite.Group()
         self._landscape_sprites = pygame.sprite.Group()
         
@@ -96,7 +96,7 @@ class Game:
         pressed_keys = pygame.key.get_pressed()
         self._player.update(pressed_keys)
         
-        # [cite_start]Actualizamos los nuevos grupos [cite: 357]
+        # Actualizamos los nuevos grupos 
         self._flying_sprites.update()
         self._landscape_sprites.update()
 
@@ -110,7 +110,7 @@ class Game:
         pygame.display.flip()
 
     def _collision(self):
-        # [cite_start]Comprobamos colisión contra _flying_sprites [cite: 302, 357]
+        # Comprobamos colisión contra _flying_sprites 
         return pygame.sprite.spritecollideany(self._player, self._flying_sprites)
 
     def _game_over(self):
